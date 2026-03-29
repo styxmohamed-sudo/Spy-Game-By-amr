@@ -45,15 +45,15 @@
     .name-input { width: 100%; border: 2px solid var(--stone-200); border-radius: 8px; padding: 12px 16px; font-family: 'Cairo', sans-serif; font-size: 1.1rem; color: var(--stone-800); background: var(--cream); transition: border-color 0.2s; outline: none; margin-bottom: 12px; text-align: center; }
     .name-input:focus { border-color: var(--stone-500); }
     .name-input::placeholder { color: var(--stone-400); }
-    .lobby-code-box { background: var(--stone-800); color: var(--amber-light); font-family: 'Katibeh', cursive; font-size: 1rem; border-radius: 8px; padding: 12px 16px; margin: 8px 0 4px; text-align: center; word-break: break-all; width: 100%; line-height: 1.6; letter-spacing: 1px; }
+    .lobby-code-box { background: var(--stone-800); color: var(--amber-light); font-family: 'Katibeh', cursive; font-size: 2.8rem; border-radius: 8px; padding: 16px 24px; margin: 8px 0 4px; text-align: center; letter-spacing: 12px; width: 100%; }
     .copy-btn { font-size: 0.9rem; background: var(--stone-100); border: 1px solid var(--stone-300); color: var(--stone-600); padding: 6px 18px; border-radius: 20px; cursor: pointer; margin-bottom: 12px; transition: all 0.2s; }
     .copy-btn:hover { background: var(--stone-200); }
-    .players-list { width: 100%; margin: 8px 0; max-height: 200px; overflow-y: auto; }
+    .players-list { width: 100%; margin: 8px 0; max-height: 220px; overflow-y: auto; }
     .player-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; margin-bottom: 6px; background: var(--stone-100); border: 1px solid var(--stone-200); animation: slideIn 0.3s ease-out; }
     .player-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
     .player-dot.host { background: var(--rose); }
     @keyframes slideIn { from{opacity:0;transform:translateX(10px);} to{opacity:1;transform:translateX(0);} }
-    .categories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin: 8px 0 16px; }
+    .categories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin: 8px 0 16px; overflow-y: auto; max-height: 400px; }
     .cat-btn { font-family: 'Katibeh', cursive; font-size: 1.5rem; padding: 14px 10px; border: 2px solid var(--stone-200); border-radius: 8px; background: var(--cream); color: var(--stone-700); cursor: pointer; transition: all 0.2s; text-align: center; }
     .cat-btn:hover { border-color: var(--stone-600); background: var(--stone-100); transform: translateY(-2px); }
     .waiting-animation { font-size: 3rem; animation: pulse 1.5s ease-in-out infinite; margin: 20px 0; }
@@ -99,6 +99,8 @@
     .error-msg { color: var(--rose); font-size: 0.9rem; margin-top: 4px; text-align: center; min-height: 20px; }
     .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-left: 8px; }
     @keyframes spin { to{transform:rotate(360deg);} }
+    .code-input { width: 100%; border: 2px solid var(--stone-200); border-radius: 8px; padding: 16px; font-family: 'Katibeh', cursive; font-size: 2.5rem; color: var(--stone-800); background: var(--cream); outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 10px; direction: ltr; }
+    .code-input:focus { border-color: var(--stone-500); }
   </style>
 </head>
 <body>
@@ -128,7 +130,7 @@
       </div>
     </div>
     <div id="create-error" class="error-msg"></div>
-    <button class="btn btn-primary" onclick="createGame()" style="margin-top:8px;" id="create-btn">ابعت الكود للأصحاب</button>
+    <button class="btn btn-primary" onclick="createGame()" style="margin-top:8px;" id="create-btn">ابدأ وجيب الكود</button>
     <button class="btn btn-secondary" onclick="showScreen('screen-home')">رجوع</button>
   </div>
 
@@ -136,7 +138,7 @@
   <div id="screen-join" class="screen">
     <div class="screen-title">انضم للعبة</div>
     <input class="name-input" id="join-name" type="text" placeholder="اسمك إيه؟" maxlength="20" />
-    <input class="name-input" id="join-code" type="text" placeholder="الصق كود اللعبة هنا" style="font-size:0.85rem;" />
+    <input class="code-input" id="join-code" type="text" placeholder="0000" maxlength="4" />
     <div id="join-error" class="error-msg"></div>
     <button class="btn btn-primary" onclick="joinGame()" id="join-btn">انضم</button>
     <button class="btn btn-secondary" onclick="showScreen('screen-home')">رجوع</button>
@@ -145,8 +147,8 @@
   <!-- LOBBY HOST -->
   <div id="screen-lobby" class="screen">
     <div class="host-badge">أنت الهوست</div>
-    <div class="screen-title" style="margin-bottom:4px;">شارك الكود مع أصحابك</div>
-    <div class="lobby-code-box" id="lobby-code-display">...</div>
+    <div class="screen-title" style="margin-bottom:4px;">كود اللعبة</div>
+    <div class="lobby-code-box font-katibeh" id="lobby-code-display">----</div>
     <button class="copy-btn" onclick="copyCode()">📋 انسخ الكود</button>
     <div class="players-list" id="lobby-players"></div>
     <button class="btn btn-primary" onclick="showCategories()" style="margin-top:8px;">ابدأ اللعبة ▶</button>
@@ -202,7 +204,7 @@
     <div class="waiting-animation">👥</div>
     <div class="info-box" id="host-next-msg"></div>
     <div class="progress-dots" id="host-dots"></div>
-    <button class="btn btn-primary" onclick="hostNext()">التالي ←</button>
+    <button class="btn btn-primary" onclick="hostNext()" id="host-next-btn">التالي ←</button>
     <button class="btn btn-secondary" onclick="deleteGameAndGoHome()">إلغاء اللعبة</button>
   </div>
 
@@ -219,11 +221,25 @@
   </div>
 </div>
 
-<script>
-const API_KEY = '$2a$10$vjqXrCK5iEeKZBTde6zDZOetQu6WEMxJxi.x/2pA4m9gMpYg2oODq';
-const BASE_URL = 'https://api.jsonbin.io/v3/b';
-const HEADERS = { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY };
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, update, remove, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDBJahhvBk0vsShKAyyPxZM17wAkHKiB9A",
+  authDomain: "spygame-6715b.firebaseapp.com",
+  projectId: "spygame-6715b",
+  databaseURL: "https://spygame-6715b-default-rtdb.europe-west1.firebasedatabase.app",
+  storageBucket: "spygame-6715b.firebasestorage.app",
+  messagingSenderId: "63095628794",
+  appId: "1:63095628794:web:b0e969ab18898f38197a43"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ===== CATEGORIES =====
 const CATEGORIES = {
   "وظائف": ["محاسب","راقص باليه","طاهي","رائد فضاء","طبيب بيطري","مخرج أفلام","ساحر","محقق خاص","منقذ سباحة","قرصان","نجم روك","جاسوس","فنان تشكيلي","مزارع","مهندس معماري","مهرج","سائق سباق","عالم مجنون","نينجا","طيار","محامي","مدرس","صحفي","عامل إطفاء"],
   "وظائف غير رسمية": ["بائع خضار","سايس","بياع مناديل","ماسح أحذية","عامل دليفري","بائع في كشك","نقاش","سباك","كهربائي","نجار","بائع شاي","بائع غزل بنات","منجد","عامل بناء","بواب","سائق توكتوك","بائع فول","مكوجي","بائع عرقسوس","رقاصة","منجم","دجال"],
@@ -235,52 +251,40 @@ const CATEGORIES = {
   "متنوع": ["كرنفال","مكتب بريد","محطة قطار","محكمة","مهرجان","معرض فن","تخييم","القطب الشمالي","جزيرة مهجورة","غزو فضائي","يانصيب","انقطاع كهرباء","بيت مسكون","مسابقة أكل","عاصفة","حجر صحي","كنز مدفون","فيلم رعب","كافيه","شيشة","كوتشينة","بلايستيشن","فرح شعبي","خناقة","قسم شرطة","ميكروباص","قهوة بلدي","صالون حلاقة","حمام سباحة","رحلة مدرسية","عيد ميلاد","طابور عيش","ماتش كورة","فرح إسلامي","خيمة رمضانية","سوق الجمعة","مترو الأنفاق","كباريه","جامع","كنيسة"]
 };
 
-let myName='', myBinId=null, isHost=false;
-let pollInterval=null, spyCount=1, cardFlipped=false, myPlayerIndex=-1;
+// ===== STATE =====
+let myName='', myCode='', isHost=false, myPlayerIndex=-1, spyCount=1, cardFlipped=false;
+let gameListener=null;
 
+// ===== HELPERS =====
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function genCode(){return String(Math.floor(1000+Math.random()*9000));}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function goHome(){stopPolling();myBinId=null;myName='';isHost=false;myPlayerIndex=-1;showScreen('screen-home');}
-function changeSpies(d){spyCount=Math.max(1,Math.min(5,spyCount+d));document.getElementById('spies-val').textContent=spyCount;}
 function showCreate(){showScreen('screen-create');}
 function showJoin(){showScreen('screen-join');}
+function changeSpies(d){spyCount=Math.max(1,Math.min(5,spyCount+d));document.getElementById('spies-val').textContent=spyCount;}
 function setBtn(id,loading){const b=document.getElementById(id);if(!b)return;if(loading){b.dataset.orig=b.innerHTML;b.innerHTML='جاري التحميل <span class="spinner"></span>';b.disabled=true;}else{b.innerHTML=b.dataset.orig||b.innerHTML;b.disabled=false;}}
+function gameRef(code){return ref(db,`games/${code}`);}
 
-// ===== API =====
-async function createBin(data){
-  const res=await fetch(BASE_URL,{method:'POST',headers:{...HEADERS,'X-Bin-Private':'false','X-Bin-Name':'spy-game'},body:JSON.stringify(data)});
-  const json=await res.json();
-  if(!json.metadata)throw new Error('API error');
-  return json.metadata.id;
+function stopListening(){
+  if(gameListener){off(ref(db,`games/${myCode}`));gameListener=null;}
 }
-async function readBin(binId){
-  const res=await fetch(`${BASE_URL}/${binId}/latest`,{headers:HEADERS});
-  const json=await res.json();
-  if(!json.record)throw new Error('not found');
-  return json.record;
-}
-async function updateBin(binId,data){await fetch(`${BASE_URL}/${binId}`,{method:'PUT',headers:HEADERS,body:JSON.stringify(data)});}
-async function deleteBin(binId){await fetch(`${BASE_URL}/${binId}`,{method:'DELETE',headers:HEADERS});}
 
-// ===== COPY =====
+function goHome(){
+  stopListening();
+  myCode='';myName='';isHost=false;myPlayerIndex=-1;
+  showScreen('screen-home');
+}
+
+// ===== COPY CODE =====
 function copyCode(){
   const code=document.getElementById('lobby-code-display').textContent;
-  navigator.clipboard.writeText(code).then(()=>{
-    const btn=document.querySelector('.copy-btn');
-    btn.textContent='✅ اتنسخ!';
-    setTimeout(()=>btn.textContent='📋 انسخ الكود',2000);
-  }).catch(()=>{
-    // fallback for mobile
-    const el=document.createElement('textarea');
-    el.value=code; document.body.appendChild(el);
-    el.select(); document.execCommand('copy'); document.body.removeChild(el);
-    const btn=document.querySelector('.copy-btn');
-    btn.textContent='✅ اتنسخ!';
-    setTimeout(()=>btn.textContent='📋 انسخ الكود',2000);
-  });
+  const copy=()=>{const btn=document.querySelector('.copy-btn');btn.textContent='✅ اتنسخ!';setTimeout(()=>btn.textContent='📋 انسخ الكود',2000);};
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(copy);}
+  else{const el=document.createElement('textarea');el.value=code;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);copy();}
 }
+window.copyCode=copyCode;
 
-// ===== CREATE =====
+// ===== CREATE GAME =====
 async function createGame(){
   const name=document.getElementById('host-name').value.trim();
   if(!name){document.getElementById('create-error').textContent='اكتب اسمك';return;}
@@ -288,103 +292,165 @@ async function createGame(){
   setBtn('create-btn',true);
   document.getElementById('create-error').textContent='';
   try{
-    const gameData={status:'lobby',spyCount,currentPlayerIndex:0,secretItem:'',players:[{name,done:false}],roles:[]};
-    myBinId=await createBin(gameData);
+    // Generate unique code
+    let code=genCode();
+    // Check if code exists, regenerate if so
+    const snap=await get(gameRef(code));
+    if(snap.exists()) code=genCode()+String(Date.now()).slice(-2);
+    myCode=code;
     myPlayerIndex=0;
-    document.getElementById('lobby-code-display').textContent=myBinId;
-    renderLobbyPlayers(gameData.players);
+    await set(gameRef(code),{
+      status:'lobby', spyCount,
+      currentPlayerIndex:0, secretItem:'',
+      players:[{name,done:false}], roles:[]
+    });
+    document.getElementById('lobby-code-display').textContent=code;
     showScreen('screen-lobby');
-    startPolling(pollLobbyHost);
+    startListening();
   }catch(e){
     document.getElementById('create-error').textContent='حصل خطأ، حاول تاني';
     setBtn('create-btn',false);
   }
 }
+window.createGame=createGame;
 
-// ===== JOIN =====
+// ===== JOIN GAME =====
 async function joinGame(){
   const name=document.getElementById('join-name').value.trim();
   const code=document.getElementById('join-code').value.trim();
   if(!name){document.getElementById('join-error').textContent='اكتب اسمك';return;}
-  if(!code){document.getElementById('join-error').textContent='الصق الكود';return;}
+  if(code.length!==4||!/^\d+$/.test(code)){document.getElementById('join-error').textContent='الكود 4 أرقام';return;}
   setBtn('join-btn',true);
   document.getElementById('join-error').textContent='';
   try{
-    const game=await readBin(code);
+    const snap=await get(gameRef(code));
+    if(!snap.exists()){document.getElementById('join-error').textContent='الكود غلط، مفيش لعبة بالكود ده';setBtn('join-btn',false);return;}
+    const game=snap.val();
     if(game.status!=='lobby'){document.getElementById('join-error').textContent='اللعبة بدأت بالفعل';setBtn('join-btn',false);return;}
-    myBinId=code;isHost=false;myName=name;
-    game.players.push({name,done:false});
-    myPlayerIndex=game.players.length-1;
-    await updateBin(myBinId,game);
-    renderLobbyPlayersGuest(game.players);
+    myCode=code;myName=name;isHost=false;
+    const players=game.players||[];
+    players.push({name,done:false});
+    myPlayerIndex=players.length-1;
+    await update(gameRef(code),{players});
     showScreen('screen-lobby-guest');
-    startPolling(pollLobbyGuest);
+    startListening();
   }catch(e){
-    document.getElementById('join-error').textContent='الكود غلط أو اللعبة مش موجودة';
+    document.getElementById('join-error').textContent='حصل خطأ، حاول تاني';
     setBtn('join-btn',false);
   }
 }
+window.joinGame=joinGame;
 
-// ===== RENDER =====
-function renderLobbyPlayers(players){
-  const c=document.getElementById('lobby-players');c.innerHTML='';
-  players.forEach((p,i)=>{const d=document.createElement('div');d.className='player-item';d.innerHTML=`<div class="player-dot ${i===0?'host':''}"></div><span style="font-weight:600">${p.name}</span>${i===0?'<span style="font-size:0.75rem;color:var(--stone-400);margin-right:auto">هوست</span>':''}`;c.appendChild(d);});
-}
-function renderLobbyPlayersGuest(players){
-  const c=document.getElementById('lobby-players-guest');c.innerHTML='';
-  players.forEach((p,i)=>{const d=document.createElement('div');d.className='player-item';d.innerHTML=`<div class="player-dot ${i===0?'host':''}"></div><span style="font-weight:600">${p.name}</span>${i===0?'<span style="font-size:0.75rem;color:var(--stone-400);margin-right:auto">هوست</span>':''}`;c.appendChild(d);});
+// ===== REALTIME LISTENER =====
+function startListening(){
+  stopListening();
+  gameListener=onValue(gameRef(myCode),(snap)=>{
+    if(!snap.exists()) return;
+    const game=snap.val();
+    handleGameUpdate(game);
+  });
 }
 
-// ===== POLLING =====
-function startPolling(fn){stopPolling();fn();pollInterval=setInterval(fn,2500);}
-function stopPolling(){if(pollInterval){clearInterval(pollInterval);pollInterval=null;}}
-async function pollLobbyHost(){try{const g=await readBin(myBinId);renderLobbyPlayers(g.players);}catch(e){}}
-async function pollLobbyGuest(){try{const g=await readBin(myBinId);renderLobbyPlayersGuest(g.players);if(g.status==='playing'){stopPolling();enterGame(g);}}catch(e){}}
+function handleGameUpdate(game){
+  const currentScreen=document.querySelector('.screen.active').id;
+
+  // Lobby screens — update player list
+  if(currentScreen==='screen-lobby'){
+    renderPlayers('lobby-players',game.players||[]);
+    return;
+  }
+  if(currentScreen==='screen-lobby-guest'){
+    renderPlayers('lobby-players-guest',game.players||[]);
+    if(game.status==='playing') enterGame(game);
+    return;
+  }
+
+  // Game screens
+  if(game.status==='finished'){showEndScreen(game);return;}
+  if(game.status==='playing'){
+    if(currentScreen==='screen-host-next') return; // host controls manually
+    if(currentScreen==='screen-my-turn') return;   // don't interrupt during card view
+    if(currentScreen==='screen-waiting-turn'){
+      if(game.currentPlayerIndex===myPlayerIndex) showMyTurn(game);
+      else showWaitingTurn(game);
+    }
+  }
+}
+
+// ===== RENDER PLAYERS =====
+function renderPlayers(containerId,players){
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  c.innerHTML='';
+  players.forEach((p,i)=>{
+    const d=document.createElement('div');d.className='player-item';
+    d.innerHTML=`<div class="player-dot ${i===0?'host':''}"></div><span style="font-weight:600">${p.name}</span>${i===0?'<span style="font-size:0.75rem;color:var(--stone-400);margin-right:auto">هوست</span>':''}`;
+    c.appendChild(d);
+  });
+}
 
 // ===== CATEGORIES =====
 function showCategories(){
-  stopPolling();
   const grid=document.getElementById('categories-grid');grid.innerHTML='';
-  Object.keys(CATEGORIES).forEach(cat=>{const b=document.createElement('button');b.className='cat-btn';b.textContent=cat;b.onclick=()=>hostStartGame(cat);grid.appendChild(b);});
+  Object.keys(CATEGORIES).forEach(cat=>{
+    const b=document.createElement('button');b.className='cat-btn';b.textContent=cat;
+    b.onclick=()=>hostStartGame(cat);grid.appendChild(b);
+  });
   showScreen('screen-categories');
 }
+window.showCategories=showCategories;
+
 async function hostStartGame(category){
   try{
-    const game=await readBin(myBinId);
-    const players=game.players;
+    const snap=await get(gameRef(myCode));
+    const game=snap.val();
+    const players=game.players||[];
     const secretItem=CATEGORIES[category][Math.floor(Math.random()*CATEGORIES[category].length)];
     const indices=shuffle([...Array(players.length).keys()]);
     const spySet=new Set(indices.slice(0,Math.min(spyCount,players.length-1)));
     const spyNames=[...spySet].map(i=>players[i].name);
-    const roles=players.map((p,i)=>{if(spySet.has(i)){return{isSpy:true,otherSpies:spyNames.filter(n=>n!==p.name)};}return{isSpy:false};});
-    game.secretItem=secretItem;game.roles=roles;game.status='playing';
-    game.currentPlayerIndex=0;game.players=players.map(p=>({...p,done:false}));
-    await updateBin(myBinId,game);
-    showHostNextScreen(game);
+    const roles=players.map((p,i)=>{
+      if(spySet.has(i))return{isSpy:true,otherSpies:spyNames.filter(n=>n!==p.name)};
+      return{isSpy:false};
+    });
+    await update(gameRef(myCode),{
+      secretItem, roles, status:'playing',
+      currentPlayerIndex:0,
+      players:players.map(p=>({...p,done:false}))
+    });
+    // Host sees first player's turn info
+    const updatedGame={...game,secretItem,roles,status:'playing',currentPlayerIndex:0,players:players.map(p=>({...p,done:false}))};
+    showHostNextScreen(updatedGame);
   }catch(e){alert('حصل خطأ، حاول تاني');}
 }
 
 // ===== GAME FLOW =====
 function enterGame(game){
-  if(game.status==='finished'){stopPolling();showEndScreen(game);return;}
-  if(game.currentPlayerIndex===myPlayerIndex){stopPolling();showMyTurn(game);}
-  else{showWaitingTurn(game);startPolling(pollGameGuest);}
+  if(game.status==='finished'){showEndScreen(game);return;}
+  if(game.currentPlayerIndex===myPlayerIndex) showMyTurn(game);
+  else showWaitingTurn(game);
 }
+
 function showWaitingTurn(game){
+  const players=game.players||[];
+  const cur=players[game.currentPlayerIndex]||{name:'...'};
   document.getElementById('waiting-my-name').textContent=myName;
-  document.getElementById('waiting-msg').textContent=`دور ${game.players[game.currentPlayerIndex].name} دلوقتي...`;
+  document.getElementById('waiting-msg').textContent=`دور ${cur.name} دلوقتي...`;
   document.getElementById('waiting-icon').textContent='😴';
-  renderDots('waiting-dots',game.players.length,game.currentPlayerIndex);
+  renderDots('waiting-dots',players.length,game.currentPlayerIndex);
   showScreen('screen-waiting-turn');
 }
+
 function showMyTurn(game){
   cardFlipped=false;
   document.getElementById('myturn-name').textContent=myName;
   document.getElementById('done-btn').style.display='none';
   document.getElementById('flip-card').classList.remove('flipped');
-  renderDots('myturn-dots',game.players.length,myPlayerIndex);
+  renderDots('myturn-dots',(game.players||[]).length,myPlayerIndex);
   const back=document.getElementById('flip-back');
-  const role=game.roles[myPlayerIndex];
+  const roles=game.roles||[];
+  const role=roles[myPlayerIndex];
+  if(!role) return;
   if(role.isSpy){
     back.className='flip-face flip-back spy-back';
     const extra=role.otherSpies&&role.otherSpies.length>0?`<div class="card-spy-note">الجاسوس التاني: ${role.otherSpies.join('، ')}</div>`:'';
@@ -395,7 +461,14 @@ function showMyTurn(game){
   }
   showScreen('screen-my-turn');
 }
-function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('flip-card').classList.add('flipped');setTimeout(()=>document.getElementById('done-btn').style.display='inline-block',600);}
+
+function flipCard(){
+  if(cardFlipped)return;cardFlipped=true;
+  document.getElementById('flip-card').classList.add('flipped');
+  setTimeout(()=>document.getElementById('done-btn').style.display='inline-block',600);
+}
+window.flipCard=flipCard;
+
 async function iAmDone(){
   const back=document.getElementById('flip-back');
   back.style.visibility='hidden';
@@ -403,80 +476,110 @@ async function iAmDone(){
   document.getElementById('done-btn').style.display='none';
   setTimeout(()=>back.style.visibility='visible',650);
   try{
-    const game=await readBin(myBinId);
-    game.players[myPlayerIndex].done=true;
-    await updateBin(myBinId,game);
+    const snap=await get(gameRef(myCode));
+    const game=snap.val();
+    const players=[...(game.players||[])];
+    players[myPlayerIndex]={...players[myPlayerIndex],done:true};
+    await update(gameRef(myCode),{players});
     document.getElementById('waiting-my-name').textContent=myName;
     document.getElementById('waiting-msg').textContent='خلاص ✅ استنى الهوست يكمّل...';
     document.getElementById('waiting-icon').textContent='✅';
-    renderDots('waiting-dots',game.players.length,game.currentPlayerIndex);
+    renderDots('waiting-dots',players.length,game.currentPlayerIndex);
     showScreen('screen-waiting-turn');
-    startPolling(pollGameGuest);
   }catch(e){}
 }
+window.iAmDone=iAmDone;
 
 // ===== HOST FLOW =====
 function showHostNextScreen(game){
-  const idx=game.currentPlayerIndex,total=game.players.length;
-  document.getElementById('host-next-msg').textContent=`دلوقتي دور: ${game.players[idx].name} (${idx+1} / ${total})`;
+  const players=game.players||[];
+  const idx=game.currentPlayerIndex, total=players.length;
+  document.getElementById('host-next-msg').textContent=`دلوقتي دور: ${players[idx]?.name||'...'} (${idx+1} / ${total})`;
   renderDots('host-dots',total,idx);
   showScreen('screen-host-next');
 }
+
 async function hostNext(){
   try{
-    const game=await readBin(myBinId);
-    const curIdx=game.currentPlayerIndex,total=game.players.length;
-    if(curIdx+1>=total){game.status='finished';await updateBin(myBinId,game);showEndScreen(game);}
-    else{game.currentPlayerIndex=curIdx+1;await updateBin(myBinId,game);showHostNextScreen(game);}
+    const snap=await get(gameRef(myCode));
+    const game=snap.val();
+    const curIdx=game.currentPlayerIndex, total=(game.players||[]).length;
+    if(curIdx+1>=total){
+      await update(gameRef(myCode),{status:'finished'});
+      showEndScreen({...game,status:'finished'});
+    }else{
+      await update(gameRef(myCode),{currentPlayerIndex:curIdx+1});
+      showHostNextScreen({...game,currentPlayerIndex:curIdx+1});
+    }
   }catch(e){alert('حصل خطأ');}
 }
-async function pollGameGuest(){
-  try{
-    const game=await readBin(myBinId);
-    if(game.status==='finished'){stopPolling();showEndScreen(game);return;}
-    if(game.currentPlayerIndex===myPlayerIndex){stopPolling();showMyTurn(game);}
-    else showWaitingTurn(game);
-  }catch(e){}
-}
+window.hostNext=hostNext;
 
 // ===== END =====
 function showEndScreen(game){
-  document.getElementById('end-secret').textContent=game.secretItem;
+  document.getElementById('end-secret').textContent=game.secretItem||'';
   const list=document.getElementById('end-roles');list.innerHTML='';
-  game.roles.forEach((role,i)=>{
+  const roles=game.roles||[], players=game.players||[];
+  roles.forEach((role,i)=>{
     const item=document.createElement('div');item.className='role-item '+(role.isSpy?'spy':'normal');
     item.style.animationDelay=(i*0.08)+'s';
-    item.innerHTML=`<span class="role-name-left">${game.players[i].name}</span><span class="role-badge font-katibeh">${role.isSpy?'🕵️ جاسوس':'✅ عادي'}</span>`;
+    item.innerHTML=`<span class="role-name-left">${players[i]?.name||''}</span><span class="role-badge font-katibeh">${role.isSpy?'🕵️ جاسوس':'✅ عادي'}</span>`;
     list.appendChild(item);
   });
   showScreen('screen-end');
 }
+
 function renderDots(id,total,current){
-  const el=document.getElementById(id);el.innerHTML='';
+  const el=document.getElementById(id);if(!el)return;el.innerHTML='';
   for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot'+(i<current?' done':i===current?' current':'');el.appendChild(d);}
 }
 
 // ===== CLEANUP =====
-async function deleteGameAndGoHome(){stopPolling();if(myBinId){try{await deleteBin(myBinId);}catch(e){}myBinId=null;}goHome();}
-async function leaveAndGoHome(){
-  stopPolling();
-  if(myBinId&&!isHost){try{const g=await readBin(myBinId);g.players.splice(myPlayerIndex,1);await updateBin(myBinId,g);}catch(e){}}
+async function deleteGameAndGoHome(){
+  stopListening();
+  if(myCode){try{await remove(gameRef(myCode));}catch(e){}}
   goHome();
 }
+window.deleteGameAndGoHome=deleteGameAndGoHome;
+
+async function leaveAndGoHome(){
+  stopListening();
+  if(myCode&&!isHost){
+    try{
+      const snap=await get(gameRef(myCode));
+      if(snap.exists()){
+        const game=snap.val();
+        const players=[...(game.players||[])];
+        players.splice(myPlayerIndex,1);
+        await update(gameRef(myCode),{players});
+      }
+    }catch(e){}
+  }
+  goHome();
+}
+window.leaveAndGoHome=leaveAndGoHome;
+
 async function playAgain(){
   if(isHost){
     try{
-      const g=await readBin(myBinId);
-      g.status='lobby';g.roles=[];g.secretItem='';g.currentPlayerIndex=0;
-      g.players=g.players.map(p=>({...p,done:false}));
-      await updateBin(myBinId,g);
-      document.getElementById('lobby-code-display').textContent=myBinId;
-      renderLobbyPlayers(g.players);
+      await update(gameRef(myCode),{status:'lobby',roles:[],secretItem:'',currentPlayerIndex:0});
+      const snap=await get(gameRef(myCode));
+      const game=snap.val();
+      renderPlayers('lobby-players',game.players||[]);
+      document.getElementById('lobby-code-display').textContent=myCode;
       showScreen('screen-lobby');
-      startPolling(pollLobbyHost);
     }catch(e){goHome();}
   }else goHome();
 }
+window.playAgain=playAgain;
+
+// expose globals
+window.showCreate=showCreate;
+window.showJoin=showJoin;
+window.changeSpies=changeSpies;
+window.showScreen=showScreen;
+window.goHome=goHome;
+
 </script>
 </body>
 </html>
